@@ -1,10 +1,16 @@
 from networktables import NetworkTables
-from . import Robot, CONFIG
+from . import Robot, Config
+
+config = Config.getConfig()
+
 
 class NetworkTableBot(Robot):
 
     def __init__(self, *args, **kwargs):
-        NetworkTables.initialize(server=kwargs.get("server", CONFIG["SERVER_ADDRESS"]))
+        NetworkTables.initialize(server=kwargs.get(
+            "server",
+            config["ROBOT"]["IP_ADDRESS"]
+            ))
         self.nt = NetworkTables.getTable("RoboRadar")
 
     @property
@@ -18,7 +24,7 @@ class NetworkTableBot(Robot):
     @property
     def r(self):
         return self.nt.getNumber("posR")
-        
+
 
 class BoxBot(NetworkTableBot):
 
@@ -39,18 +45,21 @@ class BoxBot(NetworkTableBot):
                 "name": "test",
                 "type": "polygon",
                 "style": ("filled", "aa"),
-                "color": (0,255,0),
+                "color": (0, 255, 0),
                 "layer": 0,
                 "points": [
-                    (-24,24),
-                    (24,24),
-                    (24,-24),
-                    (-24,-24)
+                    (-24, 24),
+                    (24, 24),
+                    (24, -24),
+                    (-24, -24)
                     ]
                 }
             ]
+        return shapes
 
-print(BoxBot())
+
+# print(BoxBot())
+
 
 types = {
     "BoxBot": BoxBot

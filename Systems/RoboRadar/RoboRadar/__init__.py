@@ -2,19 +2,29 @@
 
 import os
 import sys
-import re
-from enum import Enum, auto
+from enum import Enum
+
+try:
+    from RoboRadar.lib import Config
+    from RoboRadar.fields import fields, fieldFiles, fieldNames, fieldThemes
+    from RoboRadar.robots import robots
+except ImportError:
+    from lib import Config
+    from fields import fields, fieldFiles, fieldNames, fieldThemes
+    from robots import robots
+
+config = Config.getConfig()
 
 # Force program to run as a package/module. Recommended for compatibility.
 # This is designed to run as a module, but this can cause issues when
 # developing in IDLE. Non-module mode is of low priority, and may not work AT
 # ALL!!!
 # Default: True
-FORCE_RUN_AS_MODULE = True
+# FORCE_RUN_AS_MODULE = True
 
-if (FORCE_RUN_AS_MODULE) and __package__ is None:
+if (config["SYSTEM"]["FORCE_RUN_AS_MODULE"]) and __package__ is None:
     print("""Not running as module, restarting. Please run using 'py -m
-    RoboRadar.__init__'""")
+RoboRadar.__init__'""")
     existingcwd = os.getcwd()
     os.chdir(os.path.dirname(os.path.realpath(__file__))[:-10])
     os.system("py -m RoboRadar.__init__")
@@ -35,9 +45,9 @@ Do not mess with these unless you know what you are doing!
 
 
 class VideoEngines(Enum):
-    native = auto()
-    numpy = auto()
-    pygame = auto()
+    native = "native"
+    numpy = "numpy"
+    pygame = "pygame"
 
 
 VERSION = "1.0.0"
@@ -57,40 +67,40 @@ first time RoboRadar is run.
 # Number of FPS to run the screen at. Recommended 30, 60, or the refresh rate
 # of the monitor
 # Default: 60
-FPS = 60
+# FPS = 60
 
 # Team number of FRC Team
 # Default: 0
-TEAM_NUMBER = 0
+# TEAM_NUMBER = 0
 
 # NetworkTables server address, leave this unchanged to use the team number.
 # Each {}{} will be filled with part of the team number
 # Default: "10.{}.{}.2"
-SERVER_ADDRESS = "10.{}.{}.2"
+# SERVER_ADDRESS = "10.{}.{}.2"
 
 # Set the starting screen width and height
 # Default: 480, 640
-INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT = 480, 640
+# INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT = 480, 640
 
 # Enable/disable antialiased polygons and lines
 # Default: True
-ANTIALIASING = True
+# ANTIALIASING = True
 
 # Enable/disable filled polygons (gives everything a wireframe look. NOT
 # recommended)
 # Default: True
-FILLED_POLYGONS = True
+# FILLED_POLYGONS = True
 
 # Set video engine for graphics
 # Default: pygame
-VIDEO_ENGINE = VideoEngines.pygame
+# VIDEO_ENGINE = VideoEngines.pygame
 
 # Set starting field
 # Default: "FRC_2020"
-DEFAULT_FIELD = "FRC_2020"
+# DEFAULT_FIELD = "FRC_2020"
 
 # Dont mess with this. It WILL cause syncing issues
-CONFIG = {
+'''CONFIG = {
     "FPS": FPS,
     "TEAM_NUMBER": TEAM_NUMBER,
     "SERVER_ADDRESS": SERVER_ADDRESS,
@@ -101,11 +111,9 @@ CONFIG = {
     "VIDEO_ENGINE": VIDEO_ENGINE,
     "DEFAULT_FIELD": DEFAULT_FIELD
     }
+'''
 
-from RoboRadar.fields import fields, fieldFiles, fieldNames, fieldThemes
-from RoboRadar.robots import robots
-
-if VIDEO_ENGINE is VideoEngines.pygame:
+if VideoEngines[config["VIDEO"]["ENGINE"]] is VideoEngines.pygame:
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame
     import pygame.gfxdraw
@@ -118,16 +126,16 @@ def startIndependent():
     pygame.init()
 
     screen = pygame.display.set_mode(
-        (INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT),
+        config["VIDEO"]["SCREEN_DIMENSIONS"],
         pygame.RESIZABLE)
     pygame.display.set_caption("RoboRadar v{} - Team {}".format(
         VERSION,
-        TEAM_NUMBER)
+        config["TEAM"]["NUMBER"])
         )
     clock = pygame.time.Clock()
 
-    r = Radar((INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT))
-    r.loadField(DEFAULT_FIELD)
+    r = Radar(config["VIDEO"]["SCREEN_DIMENSIONS"])
+    r.loadField(config["FIELD"]["NAME"])
 
     while True:
         screen.fill((249, 249, 249))
@@ -149,15 +157,18 @@ def startIndependent():
 
         # Draw.
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick(config["VIDEO"]["FPS"])
 
 
 class Radar:
-    def __init__(self, dimensions, interface=VIDEO_ENGINE, *args, **kwargs):
+    def __init__(
+                 self, dimensions,
+                 interface=config["VIDEO"]["ENGINE"],
+                 *args, **kwargs):
         self.dimensions = dimensions
         self.fieldIndex = None
         self.field = None
-        if interface == VideoEngines.pygame:
+        if VideoEngines[interface] is VideoEngines.pygame:
             self._init_pygame(*args, **kwargs)
 
     def loadField(self, search, *args, **kwargs):
@@ -190,7 +201,7 @@ class Radar:
         fd = self.field.Data
         dimen = self.dimensions
         self._visibleSurface = pygame.Surface(dimen)
-        self._visibleSurface.fill((0, 255, 0))
+        self._visibleSurface.fill((0, 0, 0))
         if fd["width"] / fd["height"] <= dimen[0] / dimen[1]:
             height = dimen[1]
             width = fd["width"] / fd["height"] * height
@@ -231,41 +242,37 @@ class Radar:
 
     def _pygame_convertCoordinateSpace(self, points):
         p = []
+        center = self.field.Data["center"]
+        dimen = (self.field.Data["width"], self.field.Data["height"])
         for point in points:
-            p.append((((point[0]+self.field.Data["center"][0])/self.field.Data["width"]*self._staticWidth), ((point[1]+self.field.Data["center"][1])/self.field.Data["height"]*self._staticHeight)))
+            x = (point[0] + center[0]) / dimen[0] * self._staticWidth
+            y = (point[1] + center[1]) / dimen[1] * self._staticHeight
+            p.append((x, y))
         return p
 
     def pygame_render(self):
-        self._visibleSurface.fill((0, 255, 0))
+        self._visibleSurface.fill((0, 0, 0))
         self._visibleSurface.blit(self._staticSurface, self._offset)
         return self._visibleSurface
 
+
 if __name__ == "__main__":
-    if TEAM_NUMBER == 0:
-        num = input("TEAM_NUMBER option is set to 0, please enter a team number to use temporarily, or change it in __init__.py\nTeam Number: ")
+    if config["TEAM"]["NUMBER"] == 0:
+        num = input("TEAM.NUMBER option is set to 0, please enter one: ")
         try:
-            TEAM_NUMBER = float(num.strip())
+            config["TEAM"]["NUMBER"] = float(num.strip())
         except ValueError:
-            print("No TEAM_NUMBER entered, or non-numeric input given. Exiting with status code 1")
+            print("No TEAM_NUMBER entered, or non-numeric input given.")
             exit(1)
-    if TEAM_NUMBER <= 0:
-        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be greater than 0. Exiting with status code 1")
+    if config["TEAM"]["NUMBER"] <= 0:
+        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be greater than 0.")
         exit(1)
-    if int(TEAM_NUMBER) != TEAM_NUMBER:
-        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be an integer. Exiting with status code 1")
+    if int(config["TEAM"]["NUMBER"]) != config["TEAM"]["NUMBER"]:
+        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be an integer.")
         exit(1)
-    if not isinstance(TEAM_NUMBER, int):
-        TEAM_NUMBER = int(TEAM_NUMBER)
-    if len(str(TEAM_NUMBER)) > 4:
-        print("""Invalid TEAM_NUMBER. TEAM_NUMBER must be 4 digits or less.
-Exiting with status code 1""")
+    if not isinstance(config["TEAM"]["NUMBER"], int):
+        config["TEAM"]["NUMBER"] = int(config["TEAM"]["NUMBER"])
+    if len(str(config["TEAM"]["NUMBER"])) > 4:
+        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be 4 digits or less.")
         exit(1)
-    CONFIG["TEAM_NUMBER"] = TEAM_NUMBER
-    CONFIG["SERVER_ADDRESS"] = SERVER_ADDRESS.format(
-        *re.findall('..', format(TEAM_NUMBER, "04"))
-        )
     startIndependent()
-else:
-    CONFIG["SERVER_ADDRESS"] = SERVER_ADDRESS.format(
-        *re.findall('..', format(TEAM_NUMBER, "04"))
-        )
