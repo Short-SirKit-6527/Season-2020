@@ -32,7 +32,7 @@ class NetworkTableBot(Robot):
 
     @property
     def rsin(self):
-        return self.nt.getNumber("posRSin", 0)
+        return self.nt.getNumber("posRSin", 1)
 
     @property
     def rcos(self):
