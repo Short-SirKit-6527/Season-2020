@@ -3,17 +3,21 @@
 import os
 import sys
 from enum import Enum
+import ctypes
 
 try:
     from RoboRadar.lib import Config
     from RoboRadar.fields import fields, fieldFiles, fieldNames, fieldThemes
-    from RoboRadar.robots import robots
+    import RoboRadar.robots as robots
 except ImportError:
     from lib import Config
     from fields import fields, fieldFiles, fieldNames, fieldThemes
-    from robots import robots
+    import robots
 
+Config.loadConfig()
 config = Config.getConfig()
+
+robotList = robots.getRobots()
 
 # Force program to run as a package/module. Recommended for compatibility.
 # This is designed to run as a module, but this can cause issues when
@@ -121,21 +125,32 @@ if VideoEngines[config["VIDEO"]["ENGINE"]] is VideoEngines.pygame:
 else:
     raise ValueError
 
+_pgFlag = pygame.RESIZABLE | pygame.HWSURFACE | pygame.DOUBLEBUF
 
-def startIndependent():
+
+def startIndependent(flags=_pgFlag):
+    '''Start an independent RoboRadar WindowsError
+flags: flags for pygame.display.set_mode'''
+    appid = 'ShortSirkit.RoboRadar.RoboRadar.1_0_0'
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
+
     pygame.init()
 
     screen = pygame.display.set_mode(
         config["VIDEO"]["SCREEN_DIMENSIONS"],
-        pygame.RESIZABLE)
+        pygame.RESIZABLE | flags)
     pygame.display.set_caption("RoboRadar v{} - Team {}".format(
         VERSION,
         config["TEAM"]["NUMBER"])
         )
+    pygame.display.set_icon(pygame.image.load(__file__[:-11] + "icon.png"))
+
     clock = pygame.time.Clock()
 
     r = Radar(config["VIDEO"]["SCREEN_DIMENSIONS"])
     r.loadField(config["FIELD"]["NAME"])
+    bb = robotList["BoxBot"](server="127.0.0.1")
+    r.addDS(bb)
 
     while True:
         screen.fill((249, 249, 249))
@@ -161,6 +176,8 @@ def startIndependent():
 
 
 class Radar:
+    _dsArray = []
+
     def __init__(
                  self, dimensions,
                  interface=config["VIDEO"]["ENGINE"],
@@ -185,6 +202,13 @@ class Radar:
         self.field = fields[self.fieldIndex]
         self._loadField_engineSpecific()
 
+    def resize(self, dimensions):
+        self.dimensions = dimensions
+        self._resize_engineSpecific()
+
+    def addDS(self, ds):
+        self._dsArray.append(ds)
+
     def _init_pygame(self, *args, **kwargs):
         self._loadField_engineSpecific = self._loadField_pygame
         self._visibleSurface = pygame.Surface(self.dimensions)
@@ -192,10 +216,6 @@ class Radar:
 
     def _loadField_pygame(self):
         self._resize_pygame()
-
-    def resize(self, dimensions):
-        self.dimensions = dimensions
-        self._resize_engineSpecific()
 
     def _resize_pygame(self):
         fd = self.field.Data
@@ -217,42 +237,62 @@ class Radar:
             (self._staticWidth,  self._staticHeight)
             )
         for shape in fd["static-shapes"]:
-            if shape["type"] == "polygon":
-                p = self._pygame_convertCoordinateSpace(shape["points"])
-                if "filled" in shape["style"]:
-                    pygame.gfxdraw.filled_polygon(
-                        self._staticSurface,
-                        p,
-                        shape["color"]
-                        )
-                if "outline" in shape["style"]:
-                    pygame.gfxdraw.polygon(
-                        self._staticSurface,
-                        p,
-                        shape["color"]
-                        )
-                if "aa" in shape["style"]:
-                    pygame.gfxdraw.aapolygon(
-                        self._staticSurface,
-                        p,
-                        shape["color"]
-                        )
+            self._pygame_draw(shape, self._staticSurface)
 
-            # print(shape)
-
-    def _pygame_convertCoordinateSpace(self, points):
+    def _pygame_convertCoordinateSpace(self, points, offset=(0, 0)):
         p = []
         center = self.field.Data["center"]
         dimen = (self.field.Data["width"], self.field.Data["height"])
         for point in points:
             x = (point[0] + center[0]) / dimen[0] * self._staticWidth
             y = (point[1] + center[1]) / dimen[1] * self._staticHeight
-            p.append((x, y))
+            p.append((int(x + offset[0]), int(y + offset[1])))
         return p
+
+    def _pygame_draw(self, shape, surface, offset=(0, 0)):
+        p = self._pygame_convertCoordinateSpace(shape["points"], offset)
+        if shape["type"] == "polygon":
+            if "filled" in shape["style"]:
+                pygame.gfxdraw.filled_polygon(
+                    surface,
+                    p,
+                    shape["color"]
+                    )
+            if "outline" in shape["style"]:
+                pygame.gfxdraw.polygon(
+                    surface,
+                    p,
+                    shape["color"]
+                    )
+            if "aa" in shape["style"]:
+                pygame.gfxdraw.aapolygon(
+                    surface,
+                    p,
+                    shape["color"]
+                    )
+        elif shape["type"] == "line":
+            if "outline" in shape["style"]:
+                pygame.gfxdraw.line(
+                    surface,
+                    p[0][0],
+                    p[0][1],
+                    p[1][0],
+                    p[1][1],
+                    shape["color"]
+                    )
+            if "aa" in shape["style"]:
+                pygame.gfxdraw.aapolygon(
+                    surface,
+                    p,
+                    shape["color"]
+                    )
 
     def pygame_render(self):
         self._visibleSurface.fill((0, 0, 0))
         self._visibleSurface.blit(self._staticSurface, self._offset)
+        for ds in self._dsArray:
+            for shape in ds.draw():
+                self._pygame_draw(shape, self._visibleSurface, self._offset)
         return self._visibleSurface
 
 
@@ -262,17 +302,17 @@ if __name__ == "__main__":
         try:
             config["TEAM"]["NUMBER"] = float(num.strip())
         except ValueError:
-            print("No TEAM_NUMBER entered, or non-numeric input given.")
+            print("No TEAM.NUMBER entered, or non-numeric input given.")
             exit(1)
     if config["TEAM"]["NUMBER"] <= 0:
-        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be greater than 0.")
+        print("Invalid TEAM.NUMBER. TEAM.NUMBER must be greater than 0.")
         exit(1)
     if int(config["TEAM"]["NUMBER"]) != config["TEAM"]["NUMBER"]:
-        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be an integer.")
+        print("Invalid TEAM.NUMBER. TEAM.NUMBER must be an integer.")
         exit(1)
     if not isinstance(config["TEAM"]["NUMBER"], int):
         config["TEAM"]["NUMBER"] = int(config["TEAM"]["NUMBER"])
     if len(str(config["TEAM"]["NUMBER"])) > 4:
-        print("Invalid TEAM_NUMBER. TEAM_NUMBER must be 4 digits or less.")
+        print("Invalid TEAM.NUMBER. TEAM.NUMBER must be 4 digits or less.")
         exit(1)
     startIndependent()

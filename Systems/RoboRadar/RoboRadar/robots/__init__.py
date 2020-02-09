@@ -1,17 +1,18 @@
+#!/usr/bin/python3
+
 import importlib
 import os
 from abc import abstractmethod
 
 
 try:
-    from RoboRadar.lib import Config, DynamicShapeController
+    from RoboRadar.lib import Config, DynamicShape
 except ImportError:
-    from lib import Config, DynamicShapeController
+    from lib import Config, DynamicShape
 config = Config.getConfig()
 
 
-
-class Robot(DynamicShapeController.DynamicShapeController):
+class Robot(DynamicShape.DynamicShape):
 
     @classmethod
     @abstractmethod
@@ -26,16 +27,18 @@ see the docs (to be made) for more info'''
 it should return a list of shapes to be drawn on the screen.'''
         pass
 
-    def draw(self):
-        self.getShapes()
 
-
-robots = {}
-for f in os.listdir(__file__[:-11]):
-    if f.endswith(".py") and f != "__init__.py":
-        if __package__:
-            module = "." + f[:-3]
-        else:
-            module = f[:-3]
-        robotIndex = len(robots)
-        robots[f[:-3]] = importlib.import_module(module, package=__package__)
+def getRobots():
+    robots = {}
+    for f in os.listdir(__file__[:-11]):
+        if f.endswith(".py") and f != "__init__.py":
+            if __package__:
+                module = "." + f[:-3]
+            else:
+                module = f[:-3]
+            mod = importlib.import_module(
+                module,
+                package=__package__
+                )
+            robots.update(mod.types)
+    return robots
