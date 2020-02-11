@@ -9,7 +9,7 @@ Data = {
     "file": "FRC_2020",
     "version": "1.0.0",
     "author": "David Johnston",
-    "format": "PSF1", #Python Script Field - Version 1
+    "format": "PSF1",  # Python Script Field - Version 1
     "aliases": {
         "FRC 2020 FIELD 1.0.0",
         "FRC 2020 FIELD 1.0",
@@ -27,7 +27,7 @@ Data = {
         "FRC_2020V1.0",
         "FRC_2020V1",
         },
-    "date": "2020-02-03T16:01-08:00", #-05:00 Eastern no DST. DST is -04:00
+    "date": "2020-02-08T16:19-05:00",  # -05:00 Eastern no DST. DST is -04:00
     "units": "inches",
     "width": edgeWidth * 2,
     "height": edgeHeight * 2,
@@ -37,7 +37,7 @@ Data = {
             "name": "carpet",
             "type": "polygon",
             "style": ("filled"),
-            "color": (43,43,43),
+            "color": (43, 43, 43),
             "layer": 0,
             "points": [
                 (edgeWidth, edgeHeight),
@@ -50,7 +50,7 @@ Data = {
             "name": "red alliance station",
             "type": "polygon",
             "style": ("filled", "aa"),
-            "color": (96,32,32),
+            "color": (96, 32, 32),
             "layer": 0,
             "points": [
                 (edgeWidth, -edgeHeight),
@@ -67,7 +67,7 @@ Data = {
             "name": "blue alliance station",
             "type": "polygon",
             "style": ("filled", "aa"),
-            "color": (32,32,96),
+            "color": (32, 32, 96),
             "layer": 0,
             "points": [
                 (edgeWidth, edgeHeight),
@@ -84,7 +84,7 @@ Data = {
             "name": "field",
             "type": "polygon",
             "style": ("outline", "aa"),
-            "color": (128,128,128),
+            "color": (128, 128, 128),
             "layer": 0,
             "points": [
 
@@ -97,12 +97,12 @@ Data = {
                 (fieldWidth-94.66+24, edgeHeight-10*12-9-1/8),
                 (fieldWidth, edgeHeight-12*12-10-7/8),
                 ]
-            }, 
+            },
         {
             "name": "red initiation line",
             "type": "polygon",
             "style": ("filled", "aa"),
-            "color": (255,255,255),
+            "color": (255, 255, 255),
             "layer": 0,
             "points": [
                 (fieldWidth, fieldHeight-10*12),
@@ -115,7 +115,7 @@ Data = {
             "name": "blue initiation line",
             "type": "polygon",
             "style": ("filled", "aa"),
-            "color": (255,255,255),
+            "color": (255, 255, 255),
             "layer": 0,
             "points": [
                 ((26 * 12 + 11.25) / 2, -194.625),
