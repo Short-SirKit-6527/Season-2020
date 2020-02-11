@@ -28,13 +28,15 @@ void Robot::RobotInit() {
                                       kEncoderResolution);
 
   auto ntinst = nt::NetworkTableInstance::GetDefault();
-  auto positonTable = ntinst.GetTable("RoboRadar");
-  xPos = positonTable->GetEntry("xPos");
-  yPos = positonTable->GetEntry("yPos");
-  rPos = positonTable->GetEntry("rPos");
-  sPos = positonTable->GetEntry("sPos");
-  cPos = positonTable->GetEntry("cPos");
-  tPos = positonTable->GetEntry("tPos");
+  auto roboRadarTable = ntinst.GetTable("RoboRadar");
+  xPos = roboRadarTable->GetEntry("posX");
+  yPos = roboRadarTable->GetEntry("posY");
+  rPos = roboRadarTable->GetEntry("posR");
+  sPos = roboRadarTable->GetEntry("posRSin");
+  cPos = roboRadarTable->GetEntry("posRCos");
+  tPos = roboRadarTable->GetEntry("posRTan");
+
+
 }
 
 /**
@@ -57,7 +59,7 @@ void Robot::RobotPeriodic() {
   xPos.SetDouble(units::unit_cast<double>(x));
   yPos.SetDouble(units::unit_cast<double>(y));
 
-  if (kSendRadians) rPos.SetDouble(units::unit_cast<double>(positionr.Radians())); 
+  if (kSendRadians) rPos.SetDouble(units::unit_cast<double>(positionr.Radians()));
   else rPos.SetDouble(units::unit_cast<double>(positionr.Degrees()));
   sPos.SetDouble(positionr.Sin());
   cPos.SetDouble(positionr.Cos());
