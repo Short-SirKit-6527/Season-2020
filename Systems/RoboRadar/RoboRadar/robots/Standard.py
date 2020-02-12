@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
+import logging
 from networktables import NetworkTables
 from . import Robot, Config
 
 config = Config.getConfig()
 
-import logging
-
 logging.basicConfig(level=logging.DEBUG)
+
 
 class NetworkTableBot(Robot):
 
@@ -42,6 +42,10 @@ class NetworkTableBot(Robot):
     def rtan(self):
         return self.nt.getNumber("posRTan", 0)
 
+    def getTeamColor(self):
+        # return purple if no color defined
+        return tuple(self.nt.getNumberArray("color", (255, 0, 255)))
+
 
 class BoxBot(NetworkTableBot):
 
@@ -72,7 +76,7 @@ class BoxBot(NetworkTableBot):
                  "name": "bumpers",
                  "type": "polygon",
                  "style": ("filled", "aa"),
-                 "color": (255, 0, 0),
+                 "color": self.getTeamColor(),
                  "layer": 0,
                  "coordinate-space": "local",
                  "points": [
