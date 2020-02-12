@@ -21,12 +21,6 @@ class Robot(DynamicShape.DynamicShape):
 see the docs (to be made) for more info'''
         pass
 
-    @abstractmethod
-    def getShapes(self):
-        '''This method is called once per frame.
-it should return a list of shapes to be drawn on the screen.'''
-        pass
-
 
 def getRobots():
     robots = {}
