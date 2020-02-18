@@ -1,3 +1,5 @@
+from math import pi
+
 fieldHeight = (52 * 12 + 5.25) / 2
 edgeHeight = fieldHeight + (10 * 12 + 9 + 1/8)
 fieldWidth = (26 * 12 + 11.25) / 2
@@ -32,6 +34,7 @@ Data = {
     "width": edgeWidth * 2,
     "height": edgeHeight * 2,
     "center": (edgeWidth, edgeHeight),
+    "orientation": 0,
     "static-shapes": [
         {
             "name": "carpet",

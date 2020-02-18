@@ -245,7 +245,7 @@ class Radar:
         dimen = (self.field.Data["width"], self.field.Data["height"])
         for point in points:
             x = (point[0] + center[0]) / dimen[0] * self._staticWidth
-            y = (point[1] + center[1]) / dimen[1] * self._staticHeight
+            y = (-point[1] + center[1]) / dimen[1] * self._staticHeight
             p.append((int(x + offset[0]), int(y + offset[1])))
         return p
 
@@ -291,7 +291,7 @@ class Radar:
         self._visibleSurface.fill((0, 0, 0))
         self._visibleSurface.blit(self._staticSurface, self._offset)
         for ds in self._dsArray:
-            for shape in ds.draw():
+            for shape in ds.draw(self.field.Data["orientation"]):
                 self._pygame_draw(shape, self._visibleSurface, self._offset)
         return self._visibleSurface
 
@@ -315,4 +315,6 @@ if __name__ == "__main__":
     if len(str(config["TEAM"]["NUMBER"])) > 4:
         print("Invalid TEAM.NUMBER. TEAM.NUMBER must be 4 digits or less.")
         exit(1)
+    Config.setNtAddress(config["TEAM"]["NUMBER"])
+    config = Config.getConfig()
     startIndependent()

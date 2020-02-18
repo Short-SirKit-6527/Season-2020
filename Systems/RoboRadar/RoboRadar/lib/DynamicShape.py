@@ -17,27 +17,32 @@ class DynamicShape(ABC):
 it should return a list of shapes to be drawn on the screen.'''
         pass
 
-    def draw(self):
+    def draw(self, r_adjust=0):
         shapes = self.getShapes()
         if self.d is None:
             r = self.r
         else:
             r = math.radians(self.d)
-        if self.rsin is None:
+        if r_adjust == 0:
+            if self.rsin is None:
+                rsin = math.sin(r)
+            else:
+                rsin = self.rsin
+            if self.rcos is None:
+                rcos = math.cos(r)
+            else:
+                rcos = self.rcos
+            # This next section is commented out because it may be needed in
+            # the future, but for now isn't needed. Therefore if I don't need
+            # to do the calculations, I won't waste the cycles.
+            '''if self.rtan is None:
+                rtan = math.tan(r)
+            else:
+                rtan = self.rtan'''
+        else:
+            r = r + r_adjust
             rsin = math.sin(r)
-        else:
-            rsin = self.rsin
-        if self.rcos is None:
             rcos = math.cos(r)
-        else:
-            rcos = self.rcos
-        # This next section is commented out because it may be needed in the
-        # future, but for now isn't needed. Therefore if I don't need to do the
-        # calculations, I won't.
-        '''if self.rtan is None:
-            rtan = math.tan(r)
-        else:
-            rtan = self.rtan'''
         for shape in shapes:
             if shape["type"] == "polygon" or shape["type"] == "line":
                 if shape["coordinate-space"] == "local":

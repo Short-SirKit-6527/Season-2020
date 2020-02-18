@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 class NetworkTableBot(Robot):
 
     def __init__(self, *args, **kwargs):
+        print(config["ROBOT"]["IP_ADDRESS"])
         NetworkTables.initialize(server=kwargs.get(
             "server",
             config["ROBOT"]["IP_ADDRESS"]

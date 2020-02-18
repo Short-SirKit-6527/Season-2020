@@ -8,16 +8,17 @@
   },
   "TEAM": {
     "NAME": null,
-    "NUMBER": 0
+    "NUMBER": 6527
   },
   "ROBOT": {
     "NAME": null,
-    "IP_ADDRESS": "10.{}.{}.2"
+    "IP_ADDRESS_FORMAT": "10.{}.{}.2",
+    "IP_ADDRESS": null
   },
   "FIELD": {
     "NAME": "FRC_2020"
   },
   "SYSTEM": {
-    "FORCE_RUN_AS_MODULE": false
+    "FORCE_RUN_AS_MODULE": true
   }
 }
