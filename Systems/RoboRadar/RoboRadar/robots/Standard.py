@@ -2,9 +2,9 @@
 
 import logging
 from networktables import NetworkTables
-from . import Robot, Config
+from . import Robot, config
 
-config = Config.getConfig()
+conf = config.get_config()
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -12,10 +12,9 @@ logging.basicConfig(level=logging.DEBUG)
 class NetworkTableBot(Robot):
 
     def __init__(self, *args, **kwargs):
-        print(config["ROBOT"]["IP_ADDRESS"])
         NetworkTables.initialize(server=kwargs.get(
             "server",
-            config["ROBOT"]["IP_ADDRESS"]
+            conf["ROBOT"]["IP_ADDRESS"]
             ))
         self.nt = NetworkTables.getTable("RoboRadar")
 
@@ -31,7 +30,7 @@ class NetworkTableBot(Robot):
     def r(self):
         return self.nt.getNumber("posR", 0)
 
-    @property
+    '''@property
     def rsin(self):
         return self.nt.getNumber("posRSin", 1)
 
@@ -41,7 +40,7 @@ class NetworkTableBot(Robot):
 
     @property
     def rtan(self):
-        return self.nt.getNumber("posRTan", 0)
+        return self.nt.getNumber("posRTan", 0)'''
 
     def getTeamColor(self):
         # return purple if no color defined

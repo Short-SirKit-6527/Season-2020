@@ -1,21 +1,25 @@
 #!/usr/bin/python3
 
+__all__ = ['VideoEngines', 'Radar', ]
+__version__ = '0.1.0'
+__author__ = 'David Johnston'
+
 import os
 import sys
 from enum import Enum
 import ctypes
 
 try:
-    from RoboRadar.lib import Config
+    from RoboRadar import config
     from RoboRadar.fields import fields, fieldFiles, fieldNames, fieldThemes
     import RoboRadar.robots as robots
 except ImportError:
-    from lib import Config
+    import config
     from fields import fields, fieldFiles, fieldNames, fieldThemes
     import robots
 
-Config.loadConfig()
-config = Config.getConfig()
+config.load_config()
+conf = config.get_config()
 
 robotList = robots.getRobots()
 
@@ -26,7 +30,7 @@ robotList = robots.getRobots()
 # Default: True
 # FORCE_RUN_AS_MODULE = True
 
-if (config["SYSTEM"]["FORCE_RUN_AS_MODULE"]) and __package__ is None:
+if (conf["SYSTEM"]["FORCE_RUN_AS_MODULE"]) and __package__ is None:
     print("""Not running as module, restarting. Please run using 'py -m
 RoboRadar.__init__'""")
     existingcwd = os.getcwd()
@@ -117,7 +121,7 @@ first time RoboRadar is run.
     }
 '''
 
-if VideoEngines[config["VIDEO"]["ENGINE"]] is VideoEngines.pygame:
+if VideoEngines[conf["VIDEO"]["ENGINE"]] is VideoEngines.pygame:
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame
     import pygame.gfxdraw
@@ -128,7 +132,7 @@ else:
 _pgFlag = pygame.RESIZABLE | pygame.HWSURFACE | pygame.DOUBLEBUF
 
 
-def startIndependent(flags=_pgFlag):
+def start_independent(flags=_pgFlag):
     '''Start an independent RoboRadar WindowsError
 flags: flags for pygame.display.set_mode'''
     appid = 'ShortSirkit.RoboRadar.RoboRadar.1_0_0'
@@ -137,20 +141,20 @@ flags: flags for pygame.display.set_mode'''
     pygame.init()
 
     screen = pygame.display.set_mode(
-        config["VIDEO"]["SCREEN_DIMENSIONS"],
+        conf["VIDEO"]["SCREEN_DIMENSIONS"],
         pygame.RESIZABLE | flags)
     pygame.display.set_caption("RoboRadar v{} - Team {}".format(
         VERSION,
-        config["TEAM"]["NUMBER"])
+        conf["TEAM"]["NUMBER"])
         )
     pygame.display.set_icon(pygame.image.load(__file__[:-11] + "icon.png"))
 
     clock = pygame.time.Clock()
 
-    r = Radar(config["VIDEO"]["SCREEN_DIMENSIONS"])
-    r.loadField(config["FIELD"]["NAME"])
-    bb = robotList["BoxBot"](server="127.0.0.1")
-    r.addDS(bb)
+    r = Radar(conf["VIDEO"]["SCREEN_DIMENSIONS"])
+    r.loadField(conf["FIELD"]["NAME"])
+    bb = robotList["BoxBot"]()
+    r.add_ds(bb)
 
     while True:
         screen.fill((249, 249, 249))
@@ -172,7 +176,7 @@ flags: flags for pygame.display.set_mode'''
 
         # Draw.
         pygame.display.flip()
-        clock.tick(config["VIDEO"]["FPS"])
+        clock.tick(conf["VIDEO"]["FPS"])
 
 
 class Radar:
@@ -180,7 +184,7 @@ class Radar:
 
     def __init__(
                  self, dimensions,
-                 interface=config["VIDEO"]["ENGINE"],
+                 interface=conf["VIDEO"]["ENGINE"],
                  *args, **kwargs):
         self.dimensions = dimensions
         self.fieldIndex = None
@@ -206,7 +210,7 @@ class Radar:
         self.dimensions = dimensions
         self._resize_engineSpecific()
 
-    def addDS(self, ds):
+    def add_ds(self, ds):
         self._dsArray.append(ds)
 
     def _init_pygame(self, *args, **kwargs):
@@ -297,24 +301,24 @@ class Radar:
 
 
 if __name__ == "__main__":
-    if config["TEAM"]["NUMBER"] == 0:
+    if conf["TEAM"]["NUMBER"] == 0:
         num = input("TEAM.NUMBER option is set to 0, please enter one: ")
         try:
-            config["TEAM"]["NUMBER"] = float(num.strip())
+            conf["TEAM"]["NUMBER"] = float(num.strip())
         except ValueError:
             print("No TEAM.NUMBER entered, or non-numeric input given.")
             exit(1)
-    if config["TEAM"]["NUMBER"] <= 0:
+    if conf["TEAM"]["NUMBER"] <= 0:
         print("Invalid TEAM.NUMBER. TEAM.NUMBER must be greater than 0.")
         exit(1)
-    if int(config["TEAM"]["NUMBER"]) != config["TEAM"]["NUMBER"]:
+    if int(conf["TEAM"]["NUMBER"]) != conf["TEAM"]["NUMBER"]:
         print("Invalid TEAM.NUMBER. TEAM.NUMBER must be an integer.")
         exit(1)
-    if not isinstance(config["TEAM"]["NUMBER"], int):
+    if not isinstance(conf["TEAM"]["NUMBER"], int):
         config["TEAM"]["NUMBER"] = int(config["TEAM"]["NUMBER"])
-    if len(str(config["TEAM"]["NUMBER"])) > 4:
+    if len(str(conf["TEAM"]["NUMBER"])) > 4:
         print("Invalid TEAM.NUMBER. TEAM.NUMBER must be 4 digits or less.")
         exit(1)
-    Config.setNtAddress(config["TEAM"]["NUMBER"])
-    config = Config.getConfig()
-    startIndependent()
+    config.set_nt_address(conf["TEAM"]["NUMBER"])
+    conf = config.get_config()
+    start_independent()

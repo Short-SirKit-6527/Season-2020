@@ -29,12 +29,12 @@ void Robot::RobotInit() {
 
   auto ntinst = nt::NetworkTableInstance::GetDefault();
   auto positonTable = ntinst.GetTable("RoboRadar");
-  xPos = positonTable->GetEntry("xPos");
-  yPos = positonTable->GetEntry("yPos");
-  rPos = positonTable->GetEntry("rPos");
-  sPos = positonTable->GetEntry("sPos");
-  cPos = positonTable->GetEntry("cPos");
-  tPos = positonTable->GetEntry("tPos");
+  xPos = positonTable->GetEntry("posX");
+  yPos = positonTable->GetEntry("posY");
+  rPos = positonTable->GetEntry("posR");
+  sPos = positonTable->GetEntry("posRSin");
+  cPos = positonTable->GetEntry("posRCos");
+  tPos = positonTable->GetEntry("posRTan");
 }
 
 /**
@@ -46,16 +46,18 @@ void Robot::RobotInit() {
  * LiveWindow and SmartDashboard integrated updating.
  */
 void Robot::RobotPeriodic() {
-
+  //printf("%f", m_leftEncoder.GetDistance());
   // Update Odometry (robots memorized position)
-  frc::Pose2d position = m_driveOdometry.Update(frc::Rotation2d(-units::angle::degree_t(m_gyro.GetAngle())), units::length::inch_t(m_leftEncoder.GetDistance()), units::length::inch_t(m_rightEncoder.GetDistance()));
+  frc::Pose2d position = m_driveOdometry.Update(frc::Rotation2d(-units::angle::degree_t(m_gyro.GetAngle())), units::length::inch_t(-m_leftEncoder.GetDistance()), units::length::inch_t(m_rightEncoder.GetDistance()));
   frc::Translation2d positonxy = position.Translation();
   frc::Rotation2d positionr = position.Rotation();
 
-  units::length::inch_t x = positonxy.X();
-  units::length::inch_t y = positonxy.Y();
-  xPos.SetDouble(units::unit_cast<double>(x));
-  yPos.SetDouble(units::unit_cast<double>(y));
+  units::length::meter_t mx = positonxy.Y();
+  units::length::meter_t my = positonxy.X();
+  units::length::inch_t x = mx;
+  units::length::inch_t y = my;
+  xPos.SetDouble(units::unit_cast<double>(x) * 3.937);
+  yPos.SetDouble(units::unit_cast<double>(y) * 3.937);
 
   if (kSendRadians) rPos.SetDouble(units::unit_cast<double>(-positionr.Radians()));
   else rPos.SetDouble(units::unit_cast<double>(-positionr.Degrees()));
@@ -63,46 +65,7 @@ void Robot::RobotPeriodic() {
   cPos.SetDouble(positionr.Cos());
   tPos.SetDouble(positionr.Tan());
 
-  double dx = 0;
-  double dy = 0;
-  //double dz = 0;
-
-  switch(m_driveMode){
-    case 0:
-      dx = 0;
-      dy = 0;
-      break;
-    case 1:
-      dx = m_driver0.GetX(frc::GenericHID::kLeftHand);
-      dy = m_driver0.GetY(frc::GenericHID::kLeftHand);
-      break;
-    case 2:
-      dx = m_driver1.GetX();
-      dy = m_driver1.GetY();
-      break;
-    case 3:
-      dx = m_driver0.GetX(frc::GenericHID::kLeftHand) +  m_driver1.GetX();
-      dy = m_driver0.GetY(frc::GenericHID::kLeftHand) +  m_driver1.GetY();
-      break;
-    default:
-      m_driveMode = 0;
-      dx = 0;
-      dy = 0;
-  }
-  for (int boostID = 0; boostID < boostCount; boostID++){
-    if (boostID + 1 < boostCount){
-      if (m_driver0.GetRawButton(kDriveScaleBoostsButton[boostID][0]) || m_driver1.GetRawButton(kDriveScaleBoostsButton[boostID][1])){
-        dx *= kDriveScaleBoostsX[boostID];
-        dy *= kDriveScaleBoostsY[boostID];
-        boostID = boostCount;
-      }
-    }
-    else {
-      dx *= kDriveScaleBoostsX[boostID];
-      dy *= kDriveScaleBoostsY[boostID];
-    }
-  }
-  m_driveSystem.ArcadeDrive(dy, dx);
+  
 }
 
 /**
@@ -157,6 +120,52 @@ void Robot::TeleopPeriodic() {
       m_driveMode = 3;
     }
   }
+
+  m_driveMode = 3;
+  double dx = 0;
+  double dy = 0;
+  //double dz = 0;
+
+  switch(m_driveMode){
+    case 0:
+      dx = 0;
+      dy = 0;
+      break;
+    case 1:
+      dx = m_driver0.GetX(frc::GenericHID::kLeftHand);
+      dy = m_driver0.GetY(frc::GenericHID::kLeftHand);
+      break;
+    case 2:
+      dx = m_driver1.GetX();
+      dy = m_driver1.GetY();
+      break;
+    case 3:
+      dx = m_driver0.GetX(frc::GenericHID::kLeftHand) +  m_driver1.GetX();
+      dy = m_driver0.GetY(frc::GenericHID::kLeftHand) +  m_driver1.GetY();
+      break;
+    default:
+      m_driveMode = 3;
+      dx = 0;
+      dy = 0;
+  }
+  dx = m_driver0.GetX(frc::GenericHID::kLeftHand);
+  dy = m_driver0.GetY(frc::GenericHID::kLeftHand);
+  for (int boostID = 0; boostID < boostCount; boostID++){
+    if (boostID + 1 < boostCount){
+      if (m_driver0.GetRawButton(kDriveScaleBoostsButton[boostID][0]) || m_driver1.GetRawButton(kDriveScaleBoostsButton[boostID][1])){
+        dx *= kDriveScaleBoostsX[boostID];
+        dy *= kDriveScaleBoostsY[boostID];
+        boostID = boostCount;
+      }
+    }
+    else {
+      dx *= kDriveScaleBoostsX[boostID];
+      dy *= kDriveScaleBoostsY[boostID];
+    }
+  }
+  dx = m_driver0.GetX(frc::GenericHID::kLeftHand) / 2;
+  dy = m_driver0.GetY(frc::GenericHID::kLeftHand) / 2;
+  m_driveSystem.ArcadeDrive(dy, dx);
 }
 
 void Robot::TestInit() {

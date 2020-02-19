@@ -63,9 +63,9 @@ class Robot : public frc::TimedRobot {
   int m_driveMode = 3; //0 = No Drivers, 1 = Driver 0, 2 = Driver 1, 3 = Drivers 0 and 1
   #define boostCount 3
   static const int driverCount = 2;
-  const int kDriveScaleBoostsButton[boostCount-1][driverCount] = {{0, 0}, {1, 1}};
-  const double kDriveScaleBoostsX[boostCount] = { 3/3, 2/3, 1/3};
-  const double kDriveScaleBoostsY[boostCount] = { 3/3, 2/3, 1/3};
+  const int kDriveScaleBoostsButton[boostCount-1][driverCount] = {{1, 1}, {2, 2}};
+  const double kDriveScaleBoostsX[boostCount] = { 3/3, 2/3, 1/2};
+  const double kDriveScaleBoostsY[boostCount] = { 3/3, 2/3, 1/2};
 
   // DRIVE BASE CONFIG
   WPI_VictorSPX m_driveBaseL0{0};

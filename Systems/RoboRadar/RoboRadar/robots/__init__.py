@@ -6,13 +6,15 @@ from abc import abstractmethod
 
 
 try:
-    from RoboRadar.lib import Config, DynamicShape
+    from RoboRadar import config
+    from RoboRadar import dynamic_shape
 except ImportError:
-    from lib import Config, DynamicShape
-config = Config.getConfig()
+    import config
+    import dynamic_shape
+conf = config.get_config()
 
 
-class Robot(DynamicShape.DynamicShape):
+class Robot(dynamic_shape.DynamicShape):
 
     @classmethod
     @abstractmethod
