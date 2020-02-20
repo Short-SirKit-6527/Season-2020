@@ -173,7 +173,21 @@ void Robot::TestInit() {
   frc::SmartDashboard::PutNumber("Proximity", proximity);
 }
 
-void Robot::TestPeriodic() {}
+void Robot::TestPeriodic() {
+  //pusherDouble.Set(frc::DoubleSolenoid::Value::kOff);
+  if (m_driver1.GetRawButton(3)){
+    lifterDouble.Set(frc::DoubleSolenoid::Value::kForward);
+  }
+  if (m_driver1.GetRawButton(5)){
+    lifterDouble.Set(frc::DoubleSolenoid::Value::kReverse);
+  }
+
+  if (m_driver1.GetRawButton(1)){
+    pusherDouble.Set(frc::DoubleSolenoid::Value::kForward);
+  } else {
+    pusherDouble.Set(frc::DoubleSolenoid::Value::kReverse);
+  }
+}
 
 #ifndef RUNNING_FRC_TESTS
 int main() { return frc::StartRobot<Robot>(); }
@@ -184,3 +198,4 @@ void Robot::resetSystems() {
   m_leftEncoder.Reset();
   m_rightEncoder.Reset();
 }
+
