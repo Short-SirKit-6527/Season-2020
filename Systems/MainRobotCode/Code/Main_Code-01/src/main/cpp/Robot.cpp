@@ -48,7 +48,7 @@ void Robot::RobotInit() {
 void Robot::RobotPeriodic() {
   //printf("%f", m_leftEncoder.GetDistance());
   // Update Odometry (robots memorized position)
-  frc::Pose2d position = m_driveOdometry.Update(frc::Rotation2d(-units::angle::degree_t(m_gyro.GetAngle())), units::length::inch_t(-m_leftEncoder.GetDistance()), units::length::inch_t(m_rightEncoder.GetDistance()));
+  frc::Pose2d position = m_driveOdometry.Update(frc::Rotation2d(-units::angle::degree_t(m_gyro.GetAngle())), units::length::meter_t(-m_leftEncoder.GetDistance()), units::length::meter_t(m_rightEncoder.GetDistance()));
   frc::Translation2d positonxy = position.Translation();
   frc::Rotation2d positionr = position.Rotation();
 
@@ -56,13 +56,13 @@ void Robot::RobotPeriodic() {
   units::length::meter_t my = positonxy.X();
   units::length::inch_t x = mx;
   units::length::inch_t y = my;
-  xPos.SetDouble(units::unit_cast<double>(x) * 3.937);
-  yPos.SetDouble(units::unit_cast<double>(y) * 3.937);
+  xPos.SetDouble(units::unit_cast<double>(x));
+  yPos.SetDouble(units::unit_cast<double>(y));
 
-  if (kSendRadians) rPos.SetDouble(units::unit_cast<double>(-positionr.Radians()));
-  else rPos.SetDouble(units::unit_cast<double>(-positionr.Degrees()));
-  sPos.SetDouble(positionr.Sin());
-  cPos.SetDouble(positionr.Cos());
+  if (kSendRadians) rPos.SetDouble(-units::unit_cast<double>(-positionr.Radians()));
+  else rPos.SetDouble(-units::unit_cast<double>(-positionr.Degrees()));
+  sPos.SetDouble(-positionr.Sin());
+  cPos.SetDouble(-positionr.Cos());
   tPos.SetDouble(positionr.Tan());
 
   

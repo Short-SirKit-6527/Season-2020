@@ -68,11 +68,11 @@ class Robot : public frc::TimedRobot {
   const double kDriveScaleBoostsY[boostCount] = { 3/3, 2/3, 1/2};
 
   // DRIVE BASE CONFIG
-  WPI_VictorSPX m_driveBaseL0{0};
-  WPI_VictorSPX m_driveBaseL1{1};
+  WPI_VictorSPX m_driveBaseL0{2};
+  WPI_VictorSPX m_driveBaseL1{3};
   frc::SpeedControllerGroup m_driveBaseL{m_driveBaseL0, m_driveBaseL1};
-  WPI_VictorSPX m_driveBaseR0{2};
-  WPI_VictorSPX m_driveBaseR1{3};
+  WPI_VictorSPX m_driveBaseR0{0};
+  WPI_VictorSPX m_driveBaseR1{1};
   frc::SpeedControllerGroup m_driveBaseR{m_driveBaseR0, m_driveBaseR1};
   frc::DifferentialDrive m_driveSystem{m_driveBaseL, m_driveBaseR};
   frc::DifferentialDriveKinematics m_driveKinematics{27_in}; //distance between wheels
@@ -83,10 +83,10 @@ class Robot : public frc::TimedRobot {
   frc::AnalogPotentiometer m_frontUltrasonic{0, 201.378, 0};
   static constexpr auto i2cPort = frc::I2C::Port::kOnboard;
   rev::ColorSensorV3 m_colorSensor{i2cPort};
-  static constexpr double kWheelRadius = 6;  // 0.0508 meters
-  static constexpr int kEncoderResolution = 1440; //360 Counts per revolution, 1440 pulses per revolution, default 4096
-  frc::Encoder m_leftEncoder{0, 1};
-  frc::Encoder m_rightEncoder{2, 3};
+  static constexpr double kWheelRadius = 0.0762;  
+  static constexpr int kEncoderResolution = 360; //360 cycles per revolution, 1440 pulses per revolution
+  frc::Encoder m_leftEncoder{2, 3};
+  frc::Encoder m_rightEncoder{0, 1};
 
   // AUTONOMOUS CONFIG
   frc::SendableChooser<int> m_chooser;
