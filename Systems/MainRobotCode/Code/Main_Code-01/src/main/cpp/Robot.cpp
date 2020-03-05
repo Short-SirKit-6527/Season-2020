@@ -172,7 +172,10 @@ void Robot::TestInit() {
   frc::SmartDashboard::PutNumber("IR", IR);
   frc::SmartDashboard::PutNumber("Proximity", proximity);
 }
-
+/*
+ * 
+ */
+//Pnumatics
 void Robot::TestPeriodic() {
   //pusherDouble.Set(frc::DoubleSolenoid::Value::kOff);
   if (m_driver1.GetRawButton(3)){
