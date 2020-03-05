@@ -182,24 +182,7 @@ void Robot::TestInit() {
   frc::SmartDashboard::PutNumber("Proximity", proximity);
 
 }
-/*
- * 
- */
-//Pnumatics
-void Robot::TestPeriodic() {
-  //pusherDouble.Set(frc::DoubleSolenoid::Value::kOff);
-  if (m_driver1.GetRawButton(3)){
-    lifterDouble.Set(frc::DoubleSolenoid::Value::kForward);
-  }
-  if (m_driver1.GetRawButton(5)){
-    lifterDouble.Set(frc::DoubleSolenoid::Value::kReverse);
-  }
 
-  if (m_driver1.GetRawButton(1)){
-    pusherDouble.Set(frc::DoubleSolenoid::Value::kForward);
-  } else {
-    pusherDouble.Set(frc::DoubleSolenoid::Value::kReverse);
-  }
 void Robot::TestPeriodic() {
   double l = m_drivePidL.Calculate(m_leftEncoder.GetRate(), m_driver0.GetY(frc::GenericHID::kLeftHand));
   double r = m_drivePidR.Calculate(m_rightEncoder.GetRate(), m_driver0.GetY(frc::GenericHID::kRightHand));
@@ -215,4 +198,3 @@ void Robot::resetSystems() {
   m_leftEncoder.Reset();
   m_rightEncoder.Reset();
 }
-

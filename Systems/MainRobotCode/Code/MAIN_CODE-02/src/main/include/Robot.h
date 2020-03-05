@@ -22,8 +22,8 @@
 #include <frc/AnalogPotentiometer.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/Encoder.h>
-#include <frc/DoubleSolenoid.h>
-#include <frc/PidController.h>
+
+#include <frc/controller/PidController.h>
 
 #include "networktables/NetworkTable.h"
 #include "networktables/NetworkTableEntry.h"
@@ -78,8 +78,8 @@ class Robot : public frc::TimedRobot {
   double kDriveP = 0.5;
   double kDriveI = 0;
   double kDriveD = 0;
-  frc2::PIDController m_drivePidL(kDriveP, kDriveI, kDriveD);
-  frc2::PIDController m_drivePidR(kDriveP, kDriveI, kDriveD);
+  frc2::PIDController m_drivePidL{kDriveP, kDriveI, kDriveD};
+  frc2::PIDController m_drivePidR{kDriveP, kDriveI, kDriveD};
   frc::SpeedControllerGroup m_driveBaseR{m_driveBaseR0, m_driveBaseR1};
   frc::DifferentialDrive m_driveSystem{m_driveBaseL, m_driveBaseR};
   frc::DifferentialDriveKinematics m_driveKinematics{27_in}; //distance between wheels
@@ -100,8 +100,4 @@ class Robot : public frc::TimedRobot {
   int m_autoSelected;
   #define AUTOCOUNT 2
   const std::string kAutoNames[AUTOCOUNT] = {"Line Scoot", "Shoot 3"};
-
-  //PNUEMATICS
- frc::DoubleSolenoid lifterDouble{0, 1, 2};
- frc::DoubleSolenoid pusherDouble{0, 3, 4};
 };
