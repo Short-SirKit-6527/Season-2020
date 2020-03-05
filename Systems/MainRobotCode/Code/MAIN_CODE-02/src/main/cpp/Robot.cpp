@@ -183,7 +183,21 @@ void Robot::TestInit() {
 
 }
 
+//Pneumatics
 void Robot::TestPeriodic() {
+  //pusherDouble.Set(frc::DoubleSolenoid::Value::kOff);
+  if (m_driver1.GetRawButton(3)){
+    lifterDouble.Set(frc::DoubleSolenoid::Value::kForward);
+  }
+  if (m_driver1.GetRawButton(5)){
+    lifterDouble.Set(frc::DoubleSolenoid::Value::kReverse);
+  }
+
+  if (m_driver1.GetRawButton(1)){
+    pusherDouble.Set(frc::DoubleSolenoid::Value::kForward);
+  } else {
+    pusherDouble.Set(frc::DoubleSolenoid::Value::kReverse);
+  }
   double l = m_drivePidL.Calculate(m_leftEncoder.GetRate(), m_driver0.GetY(frc::GenericHID::kLeftHand));
   double r = m_drivePidR.Calculate(m_rightEncoder.GetRate(), m_driver0.GetY(frc::GenericHID::kRightHand));
   m_driveSystem.TankDrive(l, r);
