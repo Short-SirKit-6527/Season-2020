@@ -7,6 +7,8 @@
 
 #pragma once
 
+#define pusher true
+
 #include <string>
 
 #include <frc/TimedRobot.h>
@@ -23,6 +25,9 @@
 #include <frc/geometry/Rotation2d.h>
 #include <frc/Encoder.h>
 #include <frc/DoubleSolenoid.h>
+#if pusher
+  #include <frc/Spark.h>
+#endif
 
 #include <frc/controller/PidController.h>
 
@@ -64,11 +69,11 @@ class Robot : public frc::TimedRobot {
   frc::XboxController m_driver0{0};
   frc::Joystick m_driver1{1};
   int m_driveMode = 3; //0 = No Drivers, 1 = Driver 0, 2 = Driver 1, 3 = Drivers 0 and 1
-  #define boostCount 3
-  static const int driverCount = 2;
-  const int kDriveScaleBoostsButton[boostCount-1][driverCount] = {{1, 1}, {2, 2}};
-  const double kDriveScaleBoostsX[boostCount] = { 3/3, 2/3, 1/2};
-  const double kDriveScaleBoostsY[boostCount] = { 3/3, 2/3, 1/2};
+  //#define boostCount 3
+  //static const int driverCount = 2;
+  //const int kDriveScaleBoostsButton[boostCount-1][driverCount] = {{1, 1}, {2, 2}};
+  //const double kDriveScaleBoostsX[boostCount] = { 3/3, 2/3, 1/2};
+  //const double kDriveScaleBoostsY[boostCount] = { 3/3, 2/3, 1/2};
 
   // DRIVE BASE CONFIG
   WPI_VictorSPX m_driveBaseL0{2};
@@ -95,6 +100,14 @@ class Robot : public frc::TimedRobot {
   static constexpr int kEncoderResolution = 360; //360 cycles per revolution, 1440 pulses per revolution
   frc::Encoder m_leftEncoder{2, 3};
   frc::Encoder m_rightEncoder{0, 1};
+
+  // MANIPULATOR CONFIG
+  TalonSRX m_shooter{4};
+  frc::VictorSP m_harvester{0};
+  frc::VictorSP m_conveyor{0};
+  #if pusher
+    frc::Spark m_pusher{9};
+  #endif
 
   // AUTONOMOUS CONFIG
   frc::SendableChooser<int> m_chooser;

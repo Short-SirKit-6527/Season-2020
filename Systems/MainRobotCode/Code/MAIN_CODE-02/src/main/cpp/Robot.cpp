@@ -121,11 +121,24 @@ void Robot::TeleopPeriodic() {
     }
   }
 
+  if (m_driver1.GetRawButton(2)){
+    m_shooter.Set(ctre::phoenix::motorcontrol::ControlMode::Velocity, 5000);
+  } else {
+    m_shooter.Set(ctre::phoenix::motorcontrol::ControlMode::Velocity, 0);
+  }
+
+  if (m_driver1.GetRawButton(1)){
+    pusherDouble.Set(frc::DoubleSolenoid::Value::kForward);
+  } else {
+    pusherDouble.Set(frc::DoubleSolenoid::Value::kReverse);
+  }
+
   m_driveMode = 3;
   double dx = 0;
   double dy = 0;
   //double dz = 0;
 
+  /**
   switch(m_driveMode){
     case 0:
       dx = 0;
@@ -163,8 +176,36 @@ void Robot::TeleopPeriodic() {
       dy *= kDriveScaleBoostsY[boostID];
     }
   }
-  dx = m_driver0.GetX(frc::GenericHID::kLeftHand) / 2;
-  dy = m_driver0.GetY(frc::GenericHID::kLeftHand) / 2;
+  //**/
+
+  if (m_driver0.GetXButton()){
+    m_harvester.Set(1);
+    m_conveyor.Set(1);
+    #if pusher
+      m_pusher.Set(1);
+    #endif
+  } else {
+    m_harvester.Set(0);
+    m_conveyor.Set(0);
+    #if pusher
+      m_pusher.Set(0);
+    #endif
+  }
+
+  if (m_driver0.GetAButton()){
+    lifterDouble.Set(frc::DoubleSolenoid::Value::kForward);
+  }
+  if (m_driver0.GetYButton()){
+    lifterDouble.Set(frc::DoubleSolenoid::Value::kReverse);
+  }
+
+  if (m_driver0.GetBButton()){
+    dx = m_driver0.GetX(frc::GenericHID::kLeftHand) / 2;
+    dy = m_driver0.GetY(frc::GenericHID::kLeftHand) / 2;
+  } else {
+    dx = m_driver0.GetX(frc::GenericHID::kLeftHand) / 2 * 0.5;
+    dy = m_driver0.GetY(frc::GenericHID::kLeftHand) / 2 * 0.5;
+  }
   m_driveSystem.ArcadeDrive(dy, dx);
 }
 
@@ -186,18 +227,6 @@ void Robot::TestInit() {
 //Pneumatics
 void Robot::TestPeriodic() {
   //pusherDouble.Set(frc::DoubleSolenoid::Value::kOff);
-  if (m_driver1.GetRawButton(3)){
-    lifterDouble.Set(frc::DoubleSolenoid::Value::kForward);
-  }
-  if (m_driver1.GetRawButton(5)){
-    lifterDouble.Set(frc::DoubleSolenoid::Value::kReverse);
-  }
-
-  if (m_driver1.GetRawButton(1)){
-    pusherDouble.Set(frc::DoubleSolenoid::Value::kForward);
-  } else {
-    pusherDouble.Set(frc::DoubleSolenoid::Value::kReverse);
-  }
   double l = m_drivePidL.Calculate(m_leftEncoder.GetRate(), m_driver0.GetY(frc::GenericHID::kLeftHand));
   double r = m_drivePidR.Calculate(m_rightEncoder.GetRate(), m_driver0.GetY(frc::GenericHID::kRightHand));
   m_driveSystem.TankDrive(l, r);
