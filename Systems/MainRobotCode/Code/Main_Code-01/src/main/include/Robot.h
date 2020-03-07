@@ -22,6 +22,7 @@
 #include <frc/AnalogPotentiometer.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/Encoder.h>
+#include <frc/DoubleSolenoid.h>
 #include <frc/PidController.h>
 
 #include "networktables/NetworkTable.h"
@@ -99,4 +100,8 @@ class Robot : public frc::TimedRobot {
   int m_autoSelected;
   #define AUTOCOUNT 2
   const std::string kAutoNames[AUTOCOUNT] = {"Line Scoot", "Shoot 3"};
+
+  //PNUEMATICS
+ frc::DoubleSolenoid lifterDouble{0, 1, 2};
+ frc::DoubleSolenoid pusherDouble{0, 3, 4};
 };
